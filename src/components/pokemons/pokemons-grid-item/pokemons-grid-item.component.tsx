@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Heading,
     Box,
-    Center,
     Image,
     Text,
     Stack,
     Button,
     useColorModeValue,
-    Container,
 } from '@chakra-ui/react';
-import { GetPokemons_pokemon_v2_pokemon } from '../../../common/graphql/__generated__/GetPokemons';
+import { GetPokemons, GetPokemons_pokemon_v2_pokemon } from '../../../common/graphql/__generated__/GetPokemons';
+import { useChoosePokemon } from '../../../hooks/pokemons/useChoosePokemon';
 
+function isPokemonsExists(pokemon: GetPokemons_pokemon_v2_pokemon, allPokemons: GetPokemons){
+    return allPokemons.pokemon_v2_pokemon?.find(x => x.id === pokemon.id);
+}
 
 const PokemonsGridItem: React.FC<{ pokemon: GetPokemons_pokemon_v2_pokemon }> = ({ pokemon }: { pokemon: GetPokemons_pokemon_v2_pokemon }) => {
+    const [pokemonsValue, updatePokemon] = useChoosePokemon();
+    
+    const [buttonTitle, setButtonTitle] = useState(() => {
+        return isPokemonsExists(pokemon, pokemonsValue) ? 'Unchoose': 'Choose'
+    });
+    
+    const handleClick = () =>{
+        updatePokemon(pokemon);
+        isPokemonsExists(pokemon, pokemonsValue) ? setButtonTitle('Unchoose') : setButtonTitle('Choose');
+    }
+
     const pokemonSprite = JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default;
     let pokemonPowers = pokemon.pokemon_v2_pokemonstats.map(x => x.base_stat);
     const averagePower = pokemonPowers.reduce((prevValue,curValue) => {
@@ -57,14 +70,16 @@ const PokemonsGridItem: React.FC<{ pokemon: GetPokemons_pokemon_v2_pokemon }> = 
                     <Button
                         w={'full'}
                         mt={8}
-                        bg={useColorModeValue('#151f21', 'gray.900')}
+                        bg={'pink.400'}
                         color={'white'}
                         rounded={'md'}
                         _hover={{
                             transform: 'translateY(-2px)',
                             boxShadow: 'lg',
-                        }}>
-                        Choose
+                        }}
+                        onClick={handleClick}
+                        >
+                        {buttonTitle}
                     </Button>
                 </Box>
             </Box>

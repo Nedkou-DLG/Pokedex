@@ -1,4 +1,4 @@
-import { Box, Container } from '@chakra-ui/react';
+import { Box } from '@chakra-ui/react';
 import React from 'react'
 import { GetPokemons } from '../../common/graphql/__generated__/GetPokemons';
 import PokemonsGridItem from './pokemons-grid-item/pokemons-grid-item.component';
