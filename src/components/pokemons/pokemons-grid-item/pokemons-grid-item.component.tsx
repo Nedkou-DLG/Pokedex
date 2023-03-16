@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
     Heading,
     Box,
@@ -8,30 +8,59 @@ import {
     Button,
     useColorModeValue,
 } from '@chakra-ui/react';
-import { GetPokemons, GetPokemons_pokemon_v2_pokemon } from '../../../common/graphql/__generated__/GetPokemons';
-import { useChoosePokemon } from '../../../hooks/pokemons/useChoosePokemon';
+import { GetPokemons_pokemon_v2_pokemon, GetPokemons_pokemon_v2_pokemon_pokemon_v2_pokemonstats } from '../../../common/graphql/__generated__/GetPokemons';
+import { PokemonContext, PokemonsContext, Types } from '../../../hooks/pokemons/pokemonsProvider';
 
-function isPokemonsExists(pokemon: GetPokemons_pokemon_v2_pokemon, allPokemons: GetPokemons){
-    return allPokemons.pokemon_v2_pokemon?.find(x => x.id === pokemon.id);
+const isPokemonsExists = (pokemon: GetPokemons_pokemon_v2_pokemon, allPokemons: GetPokemons_pokemon_v2_pokemon[]): boolean => {
+
+    return allPokemons?.find(x => x.id === pokemon.id) ? true : false;
+}
+
+const BUTTON_TITLE = {
+    Choose: 'Choose',
+    Unchoose: 'Unchoose'
+};
+
+const addOrDeletePokemon = (pokemon: GetPokemons_pokemon_v2_pokemon, context: PokemonsContext): string => {
+    const allPokemons = context.pokemons;
+    if (allPokemons?.length) {
+        const existingPokemon = allPokemons?.find(x => x.id === pokemon.id);
+        if (!existingPokemon) {
+            context.dispatch({ type: Types.ADD, payload: pokemon });
+            return BUTTON_TITLE.Unchoose;
+        } else {
+            context.dispatch({ type: Types.REMOVE, payload: pokemon });
+            return BUTTON_TITLE.Choose;
+        }
+    } else {
+        context.dispatch({ type: Types.ADD, payload: pokemon });
+        return BUTTON_TITLE.Unchoose;
+    }
+}
+
+export const getPokemonPower = (pokemonStats: GetPokemons_pokemon_v2_pokemon_pokemon_v2_pokemonstats[]): number => {
+    const pokemonPowers = pokemonStats.map(x => x.base_stat);
+    const averagePower = pokemonPowers.reduce((prevValue, curValue) => {
+        return prevValue + curValue;
+    }, 0) / pokemonPowers.length;
+
+    return averagePower;
 }
 
 const PokemonsGridItem: React.FC<{ pokemon: GetPokemons_pokemon_v2_pokemon }> = ({ pokemon }: { pokemon: GetPokemons_pokemon_v2_pokemon }) => {
-    const [pokemonsValue, updatePokemon] = useChoosePokemon();
-    
+    const pokemonsContext = useContext(PokemonContext);
+
     const [buttonTitle, setButtonTitle] = useState(() => {
-        return isPokemonsExists(pokemon, pokemonsValue) ? 'Unchoose': 'Choose'
+        return isPokemonsExists(pokemon, pokemonsContext.pokemons) ? 'Unchoose' : 'Choose'
     });
-    
-    const handleClick = () =>{
-        updatePokemon(pokemon);
-        isPokemonsExists(pokemon, pokemonsValue) ? setButtonTitle('Unchoose') : setButtonTitle('Choose');
+
+    const handleClick = () => {
+        const buttonTitle = addOrDeletePokemon(pokemon, pokemonsContext);
+        setButtonTitle(buttonTitle);
     }
 
     const pokemonSprite = JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default;
-    let pokemonPowers = pokemon.pokemon_v2_pokemonstats.map(x => x.base_stat);
-    const averagePower = pokemonPowers.reduce((prevValue,curValue) => {
-        return prevValue + curValue;
-    },0) / pokemonPowers.length;
+
     return (
         <Box py={6}>
             <Box
@@ -41,14 +70,16 @@ const PokemonsGridItem: React.FC<{ pokemon: GetPokemons_pokemon_v2_pokemon }> = 
                 boxShadow={'2xl'}
                 rounded={'md'}
                 overflow={'hidden'}>
-                <Image
-                    h={'190px'}
-                    w={'full'}
-                    src={
-                     pokemonSprite
-                    }
-                    objectFit={'cover'}
-                />
+                <Box maxW={'270px'}>
+                    <Image
+                        h={'full'}
+                        w={'full'}
+                        src={
+                            pokemonSprite
+                        }
+                        objectFit={'cover'}
+                    />
+                </Box>
                 <Box p={6}>
                     <Stack spacing={0} align={'center'} mb={5}>
                         <Heading fontSize={'2xl'} fontWeight={500} fontFamily={'body'}>
@@ -58,9 +89,9 @@ const PokemonsGridItem: React.FC<{ pokemon: GetPokemons_pokemon_v2_pokemon }> = 
                     </Stack>
 
                     <Stack direction={'row'} justify={'center'} spacing={6}>
-                       
+
                         <Stack spacing={0} align={'center'}>
-                            <Text fontWeight={600}>{averagePower.toFixed(2)}</Text>
+                            <Text fontWeight={600}>{getPokemonPower(pokemon.pokemon_v2_pokemonstats).toFixed(2)}</Text>
                             <Text fontSize={'sm'} color={'gray.500'}>
                                 Power
                             </Text>
@@ -77,8 +108,8 @@ const PokemonsGridItem: React.FC<{ pokemon: GetPokemons_pokemon_v2_pokemon }> = 
                             transform: 'translateY(-2px)',
                             boxShadow: 'lg',
                         }}
-                        onClick={handleClick}
-                        >
+                        onClick={() => handleClick()}
+                    >
                         {buttonTitle}
                     </Button>
                 </Box>

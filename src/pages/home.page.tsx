@@ -3,7 +3,7 @@ import React from 'react'
 import PokemonsGrid from '../components/pokemons/pokemons-grid.component';
 import { useGetPokemons } from '../hooks/pokemons/useGetPokemons';
 const Home: React.FC = () => {
-    const pokemons = useGetPokemons();
+    const [pokemons, loading] = useGetPokemons();
     return (
         <Flex
         flexDirection={'row'}

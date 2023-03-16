@@ -4,13 +4,16 @@ import Home from '../../pages/home.page';
 import { ApolloProvider } from '@apollo/client';
 import client from '../../common/apollo-client';
 import WithSubnavigation from '../header/header.component';
+import { PokemonsProvider } from '../../hooks/pokemons/pokemonsProvider';
 
 const App: React.FC = () => {
   return (
     <ApolloProvider client={client}>
       <ChakraProvider>
-        <WithSubnavigation />
-        <Home />
+        <PokemonsProvider>
+          <WithSubnavigation />
+          <Home />
+        </PokemonsProvider>
       </ChakraProvider>
     </ApolloProvider>
   );

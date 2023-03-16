@@ -57,7 +57,3 @@ export interface GetPokemons {
    */
   pokemon_v2_pokemon: GetPokemons_pokemon_v2_pokemon[];
 }
-
-export interface GetPokemonsVariables {
-  limit?: number | null;
-}

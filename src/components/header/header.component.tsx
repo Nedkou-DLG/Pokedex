@@ -13,13 +13,18 @@ import {
     HamburgerIcon,
     CloseIcon,
 } from '@chakra-ui/icons';
-import { useChoosePokemon, usePokemonStorage } from '../../hooks/pokemons/useChoosePokemon';
+import { useContext } from 'react';
+import { PokemonContext } from '../../hooks/pokemons/pokemonsProvider';
+import BattleFieldModal from '../pokemons/battlefield-modal/battlefield-modal';
+import React from 'react';
 
 export default function WithSubnavigation() {
-    const [pokemonStorage] = usePokemonStorage();
-    console.log({ stroage: pokemonStorage });
+    const pokemonContext = useContext(PokemonContext);
     const { isOpen, onToggle } = useDisclosure();
-
+    const { isOpen: isOpenModal, onClose: onCloseModal, onOpen: onOpenModal} = useDisclosure();
+    const battleClick = () => {
+        onOpenModal();
+    }
     return (
         <Box>
             <Flex
@@ -65,13 +70,22 @@ export default function WithSubnavigation() {
                         fontWeight={600}
                         color={'white'}
                         bg={'pink.400'}
+                        disabled={
+                            pokemonContext.pokemons?.length !== 4
+                        }
+                        _disabled={{
+                            bg: 'pink.200'
+                        }}
                         _hover={{
                             bg: 'pink.300',
-                        }}>
-                        Battle ({pokemonStorage.pokemon_v2_pokemon.length})
+                        }}
+                        onClick={battleClick}>
+                        Battle ({pokemonContext.pokemons?.length})
                     </Button>
                 </Stack>
             </Flex>
+            <BattleFieldModal isOpen={isOpenModal} onClose={onCloseModal}></BattleFieldModal>
         </Box>
+
     );
 }

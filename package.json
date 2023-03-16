@@ -50,7 +50,11 @@
   },
   "devDependencies": {
     "@types/graphql": "^14.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.34.0",
+    "@typescript-eslint/parser": "^5.34.0",
     "apollo": "^2.33.4",
-    "apollo-language-server": "^1.26.3"
+    "apollo-language-server": "^1.26.3",
+    "eslint": "^8.22.0",
+    "eslint-plugin-react": "^7.30.1"
   }
 }
